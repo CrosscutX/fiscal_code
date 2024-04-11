@@ -42,7 +42,6 @@ function getInput() {
     }
   });
 }
-
 getInput();
 /* 
     Check through the code to ensure that is has the proper number of characters,
@@ -217,14 +216,12 @@ function checkCharacterValidation() {
 
   // Get the total sum of the code, looping through the entire code minus the last character
   for (let i = 0; i < code.length - 1; i++) {
-    console.log(code[i]);
     // Because of the nature of 0 indexed strings, the logic is inverse here of what you'd usually expect.
     if (i % 2 === 0) {
       sum += oddCharacters[code[i]];
     } else if (i % 2 !== 0) {
       sum += evenCharacters[code[i]];
     }
-    console.log(sum);
   }
 
   sum = sum % 26;
@@ -245,6 +242,10 @@ function checkCharacterValidation() {
         countryName: string;
         city: string;
         state: string;
+
+  1. Get the date born on, using yob, mob, and the bDayAndGender variables
+  2. Get gender by using a simple calculation on bDayAndGender
+  3. Using townCode and codat file, identify all the place of birth info.
 */
 
 function extractCodeData() {
@@ -258,5 +259,52 @@ function extractCodeData() {
       state: "NY",
     },
   };
-  return "Hello";
+  // Get birthday
+  person.bornOn = getPersonBirthDate();
+
+  return person;
+}
+
+function getPersonBirthDate() {
+  // Getting the current year for comparison
+  let currentDate = new Date();
+  let currentYear = currentDate.getFullYear() - 2000;
+  let personYear;
+
+  const monthCodes = {
+    A: 0,
+    B: 1,
+    C: 2,
+    D: 3,
+    E: 4,
+    H: 5,
+    L: 6,
+    M: 7,
+    P: 8,
+    R: 9,
+    S: 10,
+    T: 11,
+  };
+  let personMonth;
+  let personDay;
+  // Get the date born on
+  // If we are still using JS by the time I have to change this code, we are doomed anyways.
+  if (parseInt(yob) <= currentYear) {
+    personYear = yob + 2000;
+  } else {
+    personYear = parseInt(yob) + 1900;
+  }
+
+  personMonth = monthCodes[mob];
+
+  // Account for which gender the person is in the date calculation
+  if (bDayAndGender > 40) {
+    personDay = bDayAndGender - 40;
+  } else {
+    personDay = bDayAndGender;
+  }
+
+  let personDate = new Date(personYear, personMonth, personDay);
+
+  return personDate;
 }
