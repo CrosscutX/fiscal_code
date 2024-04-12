@@ -59,12 +59,12 @@ getInput();
 */
 function validateCode() {
   const regex = /^[A-Z]+$/;
+  const alphanumericRegex = /^[a-zA-Z0-9]+$/;
   names = code.substr(0, 6);
   yob = code.substr(6, 2);
   mob = code.substr(8, 1);
   bDayAndGender = code.substr(9, 2);
   townCodeStart = code.substr(11, 1);
-  townCodeEnd = code.substr(12, 3);
   townCode = code.substr(11, 4);
   checkCharacter = code.substr(15, 1);
 
@@ -86,7 +86,7 @@ function validateCode() {
   }
 
   // Checking portions of code that should be numerical
-  if (isNaN(yob) || isNaN(bDayAndGender) || isNaN(townCodeEnd)) {
+  if (isNaN(yob) || isNaN(bDayAndGender)) {
     console.log("Code format is incorrect");
     return false;
   }
@@ -120,8 +120,8 @@ function validateCode() {
     console.log("Invalid birthday/gender code");
     return false;
   }
-  // Use the codat file to verify town code.
-  if (!codatData[townCode]) {
+  // Use the regex to verify town code
+  if (!alphanumericRegex.test(townCode)) {
     console.log("Town code is invalid");
     return false;
   }
@@ -262,6 +262,7 @@ function extractCodeData() {
   };
   // Using codat file and townCode portion of the code, search the json info to get country data.
   const selectedTownInfo = codatData[townCode];
+
   // Get birthday
   person.bornOn = getPersonBirthDate();
 
@@ -270,11 +271,18 @@ function extractCodeData() {
     person.gender = "Female";
   }
 
-  // Apply said info to the object
-  person.placeOfBirth.countryCode = selectedTownInfo.countryCode;
-  person.placeOfBirth.countryName = selectedTownInfo.countryName;
-  person.placeOfBirth.city = selectedTownInfo.city;
-  person.placeOfBirth.state = selectedTownInfo.state;
+  // Apply said info to the object, if the codat file couldn't find the info, then just fill in null
+  if (selectedTownInfo !== undefined) {
+    person.placeOfBirth.countryCode = selectedTownInfo.countryCode;
+    person.placeOfBirth.countryName = selectedTownInfo.countryName;
+    person.placeOfBirth.city = selectedTownInfo.city;
+    person.placeOfBirth.state = selectedTownInfo.state;
+  } else {
+    person.placeOfBirth.countryCode = null;
+    person.placeOfBirth.countryName = null;
+    person.placeOfBirth.city = null;
+    person.placeOfBirth.state = null;
+  }
 
   return person;
 }
