@@ -246,6 +246,7 @@ function checkCharacterValidation() {
   1. Get the date born on, using yob, mob, and the bDayAndGender variables
   2. Get gender by using a simple calculation on bDayAndGender
   3. Using townCode and codat file, identify all the place of birth info.
+  4. Apply everything to the person object
 */
 
 function extractCodeData() {
@@ -259,8 +260,21 @@ function extractCodeData() {
       state: "NY",
     },
   };
+  // Using codat file and townCode portion of the code, search the json info to get country data.
+  const selectedTownInfo = codatData[townCode];
   // Get birthday
   person.bornOn = getPersonBirthDate();
+
+  // Get gender
+  if (bDayAndGender > 31) {
+    person.gender = "Female";
+  }
+
+  // Apply said info to the object
+  person.placeOfBirth.countryCode = selectedTownInfo.countryCode;
+  person.placeOfBirth.countryName = selectedTownInfo.countryName;
+  person.placeOfBirth.city = selectedTownInfo.city;
+  person.placeOfBirth.state = selectedTownInfo.state;
 
   return person;
 }
@@ -290,7 +304,7 @@ function getPersonBirthDate() {
   // Get the date born on
   // If we are still using JS by the time I have to change this code, we are doomed anyways.
   if (parseInt(yob) <= currentYear) {
-    personYear = yob + 2000;
+    personYear = parseInt(yob) + 2000;
   } else {
     personYear = parseInt(yob) + 1900;
   }
