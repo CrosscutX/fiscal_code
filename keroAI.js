@@ -2,18 +2,13 @@ const fs = require("fs");
 // Reading in the codat file.
 const codatPath = "./codat.json";
 let codatData;
-fs.readFile(codatPath, "utf8", (err, data) => {
-  if (err) {
-    console.log("Error reading file:", err);
-    return;
-  }
 
-  try {
-    codatData = JSON.parse(data);
-  } catch (err) {
-    console.error("Error parsing data", err);
-  }
-});
+try {
+  const data = fs.readFileSync(codatPath, "utf8");
+  codatData = JSON.parse(data);
+} catch (err) {
+  console.error("Error reading or parsing file:", err);
+}
 
 const readline = require("readline").createInterface({
   input: process.stdin,
@@ -291,18 +286,6 @@ function extractCodeData() {
     },
   };
 
-  let replacementValues = {
-    L: 0,
-    M: 1,
-    N: 2,
-    P: 3,
-    Q: 4,
-    R: 5,
-    S: 6,
-    T: 7,
-    U: 8,
-    V: 9,
-  };
   // Using codat file and townCode portion of the code, search the json info to get country data.
   const selectedTownInfo = codatData[townCode];
 
