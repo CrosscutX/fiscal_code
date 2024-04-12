@@ -65,6 +65,7 @@ function validateCode() {
   mob = code.substr(8, 1);
   bDayAndGender = code.substr(9, 2);
   townCodeStart = code.substr(11, 1);
+  townCodeEnd = code.substr(12, 3);
   townCode = code.substr(11, 4);
   checkCharacter = code.substr(15, 1);
 
@@ -86,7 +87,11 @@ function validateCode() {
   }
 
   // Checking portions of code that should be numerical
-  if (isNaN(yob) || isNaN(bDayAndGender)) {
+  if (
+    !numericValidation(yob) ||
+    !numericValidation(bDayAndGender) ||
+    !numericValidation(townCodeEnd)
+  ) {
     console.log("Code format is incorrect");
     return false;
   }
@@ -131,6 +136,29 @@ function validateCode() {
     return false;
   }
   console.log("Code is valid");
+  return true;
+}
+// Helper for numeric portions of the code, checks if a digit could potentially be a replacement character
+function numericValidation(number) {
+  const replacementValues = ["L", "M", "N", "P", "Q", "R", "S", "T", "U", "V"];
+  let numberArray = number.split("");
+  let numberOrReplacement = false;
+
+  // Maybe a better way to do this. Check each value the function gets to see if each value is either in
+  // the replacement array, or if it is a number. If either is found we break and move onto the next
+  // loop iteration.
+  for (let i = 0; i < numberArray.length; i++) {
+    notNumberOrReplacement = false;
+    for (let j = 0; j < replacementValues.length; j++) {
+      if (!isNaN(numberArray[i]) || numberArray[i] === replacementValues[j]) {
+        numberOrReplacement = true;
+        break;
+      }
+    }
+    if (numberOrReplacement === false) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -250,6 +278,8 @@ function checkCharacterValidation() {
 */
 
 function extractCodeData() {
+  // Function to return code back to original form for ease of use in function.
+  decipherCode();
   let person = {
     bornOn: new Date(),
     gender: "Male",
@@ -260,11 +290,24 @@ function extractCodeData() {
       state: "NY",
     },
   };
+
+  let replacementValues = {
+    L: 0,
+    M: 1,
+    N: 2,
+    P: 3,
+    Q: 4,
+    R: 5,
+    S: 6,
+    T: 7,
+    U: 8,
+    V: 9,
+  };
   // Using codat file and townCode portion of the code, search the json info to get country data.
   const selectedTownInfo = codatData[townCode];
 
   // Get birthday
-  person.bornOn = getPersonBirthDate();
+  if (yob) person.bornOn = getPersonBirthDate();
 
   // Get gender
   if (bDayAndGender > 31) {
@@ -285,6 +328,55 @@ function extractCodeData() {
   }
 
   return person;
+}
+
+function decipherCode() {
+  let tempStr = "";
+  let replacementValues = {
+    L: 0,
+    M: 1,
+    N: 2,
+    P: 3,
+    Q: 4,
+    R: 5,
+    S: 6,
+    T: 7,
+    U: 8,
+    V: 9,
+  };
+  // Set yob
+  for (let i = 0; i < yob.length; i++) {
+    if (isNaN(yob[i])) {
+      tempStr += replacementValues[yob[i]];
+    } else {
+      tempStr += yob[i];
+    }
+  }
+  yob = tempStr;
+  tempStr = "";
+
+  // SetBdayAndGender
+  for (let i = 0; i < bDayAndGender.length; i++) {
+    if (isNaN(bDayAndGender[i])) {
+      tempStr += replacementValues[bDayAndGender[i]];
+    } else {
+      tempStr += bDayAndGender[i];
+    }
+  }
+  bDayAndGender = tempStr;
+  tempStr = "";
+
+  for (let i = 0; i < townCodeEnd.length; i++) {
+    if (isNaN(townCodeEnd[i])) {
+      tempStr += replacementValues[townCodeEnd[i]];
+    } else {
+      tempStr += townCodeEnd[i];
+    }
+  }
+
+  townCodeEnd = tempStr;
+  townCode = townCodeStart + townCodeEnd;
+  tempStr = "";
 }
 
 function getPersonBirthDate() {
