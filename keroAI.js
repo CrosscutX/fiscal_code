@@ -2,7 +2,7 @@ const fs = require("fs");
 // Reading in the codat file.
 const codatPath = "./codat.json";
 let codatData;
-
+// Synchronously get the data from the file.
 try {
   const data = fs.readFileSync(codatPath, "utf8");
   codatData = JSON.parse(data);
